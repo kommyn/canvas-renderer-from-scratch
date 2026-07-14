@@ -2,55 +2,115 @@ import "normalize.css";
 
 import "./styles.module.css";
 
-const canvasElement = document.createElement("canvas");
+import { Text } from "./classes/Drawable/Text";
+import { Asset } from "./classes/Assets/Asset";
+import { Sprite } from "./classes/Drawable/Sprite";
 
-let windowWidth = document.body.clientWidth;
-let windowHeight = document.body.clientHeight;
+import FootmanJson from "./assets/footman.json";
 
-window.addEventListener("resize", () => {
-  windowWidth = document.body.clientWidth;
-  windowHeight = document.body.clientHeight;
+import Footman from "./assets/footman.jpg";
+import { SpriteSheet } from "./classes/Animation/SpriteSheet";
 
-  if (canvasElement) {
-    canvasElement.setAttribute("width", String(windowWidth));
-    canvasElement.setAttribute("height", String(windowHeight));
-    canvasElement.style.width = `${windowWidth}px`;
-    canvasElement.style.height = `${windowHeight}px`;
-  }
-});
+import { Application } from "./classes/Application";
+import type { Callback } from "./classes/types";
 
-if (canvasElement) {
-  canvasElement.setAttribute("width", String(windowWidth));
-  canvasElement.setAttribute("height", String(windowHeight));
-  canvasElement.style.width = `${windowWidth}px`;
-  canvasElement.style.height = `${windowHeight}px`;
-}
+const app = new Application();
 
-document.body.appendChild(canvasElement);
+app.init();
 
-const context2d = canvasElement.getContext("2d");
+document.body.append(app.canvas);
 
-if (context2d) {
-  draw(context2d);
-} else {
-  alert("No avail");
-}
+const fpsDrawable = new Text({ text: "" });
+fpsDrawable.callback = ({ context, elapsedTime }) => {
+  fpsDrawable.text = String(Math.ceil(1000 / elapsedTime));
+  fpsDrawable.x = context.canvas.width - 50;
+  fpsDrawable.y = 50;
+};
 
-function draw(context2d: CanvasRenderingContext2D) {
-  // Set line width
-  context2d.lineWidth = 10;
+app.addDrawable(fpsDrawable);
 
-  // Wall
-  context2d.strokeRect(75, 140, 150, 110);
+const footmanAsset = new Asset(Footman);
+footmanAsset.load();
+const footmanSpriteSheet = new SpriteSheet(footmanAsset, FootmanJson);
+footmanSpriteSheet.parse();
+console.log("footmanSpriteSheet: ", footmanSpriteSheet);
 
-  // Door
-  context2d.fillRect(130, 190, 40, 60);
+const createFootmanSprite = (x: number, y: number) => {
+  const footmanSprite = new Sprite(footmanSpriteSheet);
+  const footSpeed = 0.25;
+  const footmanFramesDuration = 100;
+  footmanSprite.x = x;
+  footmanSprite.y = y;
+  footmanSprite.setAnimation("staying_up", 100);
 
-  // Roof
-  context2d.beginPath();
-  context2d.moveTo(50, 140);
-  context2d.lineTo(150, 60);
-  context2d.lineTo(250, 140);
-  context2d.closePath();
-  context2d.stroke();
-}
+  const callback: Callback = ({ elapsedTime, keyboardInputMap }) => {
+    const keyW = keyboardInputMap.get("KeyW");
+    const keyA = keyboardInputMap.get("KeyA");
+    const keyS = keyboardInputMap.get("KeyS");
+    const keyD = keyboardInputMap.get("KeyD");
+
+    let footmanSpeed = elapsedTime * footSpeed;
+
+    // BAD PRACTICE!!! REWORK IT!!!
+    if (keyW.pressed && keyD.pressed) {
+      footmanSprite.y = footmanSprite.y - 0.75 * footmanSpeed;
+      footmanSprite.x = footmanSprite.x + 0.75 * footmanSpeed;
+      footmanSprite.setAnimation("walking_right_up", footmanFramesDuration);
+    } else if (keyW.pressed && keyA.pressed) {
+      footmanSprite.y = footmanSprite.y - 0.75 * footmanSpeed;
+      footmanSprite.x = footmanSprite.x - 0.75 * footmanSpeed;
+      footmanSprite.setAnimation("walking_left_up", footmanFramesDuration);
+    } else if (keyS.pressed && keyD.pressed) {
+      footmanSprite.y = footmanSprite.y + 0.75 * footmanSpeed;
+      footmanSprite.x = footmanSprite.x + 0.75 * footmanSpeed;
+      footmanSprite.setAnimation("walking_right_down", footmanFramesDuration);
+    } else if (keyS.pressed && keyA.pressed) {
+      footmanSprite.y = footmanSprite.y + 0.75 * footmanSpeed;
+      footmanSprite.x = footmanSprite.x - 0.75 * footmanSpeed;
+      footmanSprite.setAnimation("walking_left_down", footmanFramesDuration);
+    } else if (keyW.pressed) {
+      footmanSprite.y = footmanSprite.y - footmanSpeed;
+      footmanSprite.setAnimation("walking_up", footmanFramesDuration);
+    } else if (keyA.pressed) {
+      footmanSprite.x = footmanSprite.x - footmanSpeed;
+      footmanSprite.setAnimation("walking_left", footmanFramesDuration);
+    } else if (keyS.pressed) {
+      footmanSprite.y = footmanSprite.y + footmanSpeed;
+      footmanSprite.setAnimation("walking_down", footmanFramesDuration);
+    } else if (keyD.pressed) {
+      footmanSprite.x = footmanSprite.x + footmanSpeed;
+      footmanSprite.setAnimation("walking_right", footmanFramesDuration);
+    } else if (footmanSprite.animationName === "walking_up") {
+      footmanSprite.setAnimation("staying_up", footmanFramesDuration);
+    } else if (footmanSprite.animationName === "walking_down") {
+      footmanSprite.setAnimation("staying_down", footmanFramesDuration);
+    } else if (footmanSprite.animationName === "walking_right") {
+      footmanSprite.setAnimation("staying_right", footmanFramesDuration);
+    } else if (footmanSprite.animationName === "walking_left") {
+      footmanSprite.setAnimation("staying_left", footmanFramesDuration);
+    } else if (footmanSprite.animationName === "walking_left_up") {
+      footmanSprite.setAnimation("staying_left_up", footmanFramesDuration);
+    } else if (footmanSprite.animationName === "walking_left_down") {
+      footmanSprite.setAnimation("staying_left_down", footmanFramesDuration);
+    } else if (footmanSprite.animationName === "walking_right_up") {
+      footmanSprite.setAnimation("staying_right_up", footmanFramesDuration);
+    } else if (footmanSprite.animationName === "walking_right_down") {
+      footmanSprite.setAnimation("staying_right_down", footmanFramesDuration);
+    }
+  };
+
+  footmanSprite.callback = callback;
+
+  return footmanSprite;
+};
+
+const footmanSprites = Array.from({ length: 400 }).map((_, index) =>
+  createFootmanSprite(
+    50 + 50 * Math.floor(index % (app.width / 50)),
+    50 + 50 * Math.floor(index / (app.width / 50)),
+  ),
+);
+
+footmanSprites.map((footmanSprite) => app.addDrawable(footmanSprite));
+
+app.run();
