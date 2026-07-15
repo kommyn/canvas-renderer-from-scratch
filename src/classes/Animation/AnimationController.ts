@@ -1,3 +1,4 @@
+import type { IAnimationFrame } from "../types";
 import type { SpriteSheet } from "./SpriteSheet";
 
 enum AnimationStateEnum {
@@ -65,10 +66,9 @@ const PLAY_STATE: IAnimationState = {
 
     ctx.resetDuration();
 
-    let nextFrameIndex = ctx.frame.index + 1;
-    if (animation.length <= nextFrameIndex) nextFrameIndex = 0;
+    const nextFrame = ctx.frame.next || (animation[0] as IAnimationFrame);
 
-    ctx.setFrame(animation[nextFrameIndex] as string, nextFrameIndex);
+    ctx.setFrame(nextFrame);
   },
 };
 
@@ -93,7 +93,7 @@ export class AnimationController {
   private _spriteSheet: SpriteSheet;
   private _state: IAnimationState;
   private _duration: number = 0;
-  private _frame: { name: string; index: number } | null = null;
+  private _frame: IAnimationFrame | null = null;
   private _animation: string | null = null;
   private _framesDuration: number = 0;
 
@@ -138,8 +138,8 @@ export class AnimationController {
     this._state = state;
   }
 
-  setFrame(frameName: string, frameIndex: number) {
-    this._frame = { name: frameName, index: frameIndex };
+  setFrame(frame: IAnimationFrame) {
+    this._frame = frame;
   }
 
   addDuration(duration: number) {
@@ -157,7 +157,7 @@ export class AnimationController {
       const animation = this._spriteSheet.animations[this._animation];
       if (!(animation && animation.length !== 0)) return;
 
-      this._frame = { name: animation[0] as string, index: 0 };
+      this._frame = animation[0] as IAnimationFrame;
     }
   }
 
@@ -176,7 +176,7 @@ export class AnimationController {
     }
 
     this._animation = animationName;
-    this._frame = { name: animation[0] as string, index: 0 };
+    this._frame = animation[0] as IAnimationFrame;
     this._duration = 0;
     this._framesDuration = framesDuration;
   }

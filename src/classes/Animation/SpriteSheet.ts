@@ -5,7 +5,7 @@ export class SpriteSheet<
   T extends Record<string, unknown> = Record<string, unknown>,
 > {
   private _frames: { [key: string]: IFrame } = {};
-  private _animations: { [key: string]: string[] } = {};
+  private _animations: { [key: string]: IAnimationFrame[] } = {};
   private _rawData: T;
   private _asset: Asset;
   private _isParsed = false;
@@ -86,26 +86,40 @@ export class SpriteSheet<
   private parseAnimations(animations: unknown) {
     if (animations === null || typeof animations !== "object") return {};
 
-    const frameKeys = Object.keys(this._frames);
+    return Object.entries(animations).reduce<{
+      [key: string]: IAnimationFrame[];
+    }>((acc, [key, frameNames]) => {
+      if (!(Array.isArray(frameNames) && frameNames.length)) return acc;
 
-    return Object.entries(animations).reduce<{ [key: string]: string[] }>(
-      (acc, [key, animationFrames]) => {
-        if (!Array.isArray(animationFrames)) return acc;
+      const animationFrames = frameNames.reduce<IAnimationFrame[]>(
+        (acc, frameName) => {
+          const frame = this._frames[frameName];
 
-        const isAllFramesExists = animationFrames.every((animationFrame) => {
-          return (
-            typeof animationFrame === "string" &&
-            frameKeys.includes(animationFrame)
-          );
-        });
+          if (frame) {
+            const newFrame = {
+              data: frame,
+              name: frameName,
+              next: null,
+            };
 
-        if (isAllFramesExists) {
-          acc[key] = animationFrames;
-        }
+            const prevAnimatedFrame = acc[acc.length - 1];
+            if (prevAnimatedFrame) prevAnimatedFrame.next = newFrame;
 
-        return acc;
-      },
-      {},
-    );
+            acc.push(newFrame);
+          }
+
+          return acc;
+        },
+        [],
+      );
+
+      const isAllFramesExists = animationFrames.length === frameNames.length;
+
+      if (isAllFramesExists) {
+        acc[key] = animationFrames;
+      }
+
+      return acc;
+    }, {});
   }
 }

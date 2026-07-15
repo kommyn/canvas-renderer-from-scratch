@@ -66,24 +66,22 @@ export class Sprite implements IDrawable {
 
     this._callback && this._callback(data);
 
-    const frame = this._animationController.spriteSheet.frames[
-      this._animationController.frame.name
-    ] as IFrame;
+    const frame = this._animationController.frame;
 
     // console.time("animation process");
     this._animationController.process(data.elapsedTime);
     // console.timeEnd("animation process");
-    this._size.w = frame.w;
-    this._size.h = frame.h;
+    this._size.w = frame.data.w;
+    this._size.h = frame.data.h;
 
     data.context.drawImage(
       this._animationController.asset?.elem as CanvasImageSource,
-      frame.x,
-      frame.y,
-      frame.w,
-      frame.h,
-      this.x - frame.w,
-      this.y - frame.h,
+      frame.data.x,
+      frame.data.y,
+      frame.data.w,
+      frame.data.h,
+      this.x - frame.data.w,
+      this.y - frame.data.h,
       this.w,
       this.h,
     );

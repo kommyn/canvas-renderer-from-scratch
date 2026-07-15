@@ -104,7 +104,7 @@ const createFootmanSprite = (x: number, y: number) => {
   return footmanSprite;
 };
 
-const footmanSprites = Array.from({ length: 400 }).map((_, index) =>
+const footmanSprites = Array.from({ length: 1 }).map((_, index) =>
   createFootmanSprite(
     50 + 50 * Math.floor(index % (app.width / 50)),
     50 + 50 * Math.floor(index / (app.width / 50)),

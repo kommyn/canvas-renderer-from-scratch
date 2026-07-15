@@ -17,7 +17,8 @@ export interface IFrame {
   h: number;
 }
 
-export interface IAnimationFrame extends IFrame {
+export interface IAnimationFrame {
+  data: IFrame;
   name: string;
   next: IAnimationFrame | null;
 }
