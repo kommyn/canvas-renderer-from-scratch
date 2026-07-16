@@ -1,7 +1,8 @@
 import { ButtonsMap } from "../InputManager";
+import type { ICanvasRenderer } from "../Renderers/ICanvasRenderer";
 
 export interface IDrawableOptions {
-  context: CanvasRenderingContext2D;
+  renderer: ICanvasRenderer;
   elapsedTime: number;
   mouseInputMap: ButtonsMap<number>;
   keyboardInputMap: ButtonsMap<string>;

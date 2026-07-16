@@ -3,7 +3,7 @@ import type { IDrawable, IDrawableOptions } from "./IDrawable";
 
 export class Text implements IDrawable {
   private _text = "";
-  private _font?: string = "24px sans-serif";
+  private _font: string = "24px sans-serif";
   private _coords: ICoords = { x: 0, y: 0 };
   private _callback: Callback | null = null;
 
@@ -29,6 +29,10 @@ export class Text implements IDrawable {
     this._coords.y = num;
   }
 
+  set font(fontStr: string) {
+    this._font = fontStr;
+  }
+
   get text() {
     return this._text;
   }
@@ -41,10 +45,13 @@ export class Text implements IDrawable {
     return this._coords.y;
   }
 
+  get font() {
+    return this._font;
+  }
+
   draw(data: IDrawableOptions) {
     this._callback && this._callback(data);
 
-    if (this._font) data.context.font = this._font;
-    data.context.fillText(this._text, this._coords.x, this._coords.y);
+    data.renderer.drawText(this.text, this.x, this.y, { font: this.font });
   }
 }

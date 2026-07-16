@@ -1,1 +1,1 @@
-export class EventHander {}
+export class EventHandler {}

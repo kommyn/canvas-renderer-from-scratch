@@ -3,7 +3,6 @@ import "normalize.css";
 import "./styles.module.css";
 
 import { Text } from "./classes/Drawable/Text";
-import { Asset } from "./classes/Assets/Asset";
 import { Sprite } from "./classes/Drawable/Sprite";
 
 import FootmanJson from "./assets/footman.json";
@@ -13,29 +12,38 @@ import { SpriteSheet } from "./classes/Animation/SpriteSheet";
 
 import { Application } from "./classes/Application";
 import type { Callback } from "./classes/types";
+import { Assets } from "./classes/Assets/Assets";
 
-const app = new Application();
+const app = new Application("webgl2");
 
 app.init();
 
 document.body.append(app.canvas);
 
-const fpsDrawable = new Text({ text: "" });
-fpsDrawable.callback = ({ context, elapsedTime }) => {
+const fpsDrawable = new Text({ text: "", font: "24px sans-serif" });
+fpsDrawable.callback = ({ renderer, elapsedTime }) => {
   fpsDrawable.text = String(Math.ceil(1000 / elapsedTime));
-  fpsDrawable.x = context.canvas.width - 50;
+  fpsDrawable.x = renderer.context.canvas.width - 50;
   fpsDrawable.y = 50;
 };
 
 app.addDrawable(fpsDrawable);
 
-const footmanAsset = new Asset(Footman);
-footmanAsset.load();
-const footmanSpriteSheet = new SpriteSheet(footmanAsset, FootmanJson);
-footmanSpriteSheet.parse();
-console.log("footmanSpriteSheet: ", footmanSpriteSheet);
+let footmanSpriteSheet: SpriteSheet;
+const createFootSpriteSheet = async () => {
+  const footmanAsset = await Assets.load(Footman);
+  if (!footmanAsset) return null;
 
-const createFootmanSprite = (x: number, y: number) => {
+  if (!footmanSpriteSheet) {
+    footmanSpriteSheet = new SpriteSheet(footmanAsset, FootmanJson);
+    footmanSpriteSheet.parse();
+  }
+  return footmanSpriteSheet;
+};
+
+const createFootmanSprite = async (x: number, y: number) => {
+  await createFootSpriteSheet();
+
   const footmanSprite = new Sprite(footmanSpriteSheet);
   const footSpeed = 0.25;
   const footmanFramesDuration = 100;
@@ -104,13 +112,21 @@ const createFootmanSprite = (x: number, y: number) => {
   return footmanSprite;
 };
 
-const footmanSprites = Array.from({ length: 1 }).map((_, index) =>
-  createFootmanSprite(
-    50 + 50 * Math.floor(index % (app.width / 50)),
-    50 + 50 * Math.floor(index / (app.width / 50)),
-  ),
-);
+(async () => {
+  await createFootSpriteSheet();
+  
+  const footmanSprites = await Promise.all(
+    Array.from({ length: 10000 }).map((_, index) =>
+      createFootmanSprite(
+        50 + 50 * Math.floor(index % (app.w / 50)),
+        50 + 50 * Math.floor(index / (app.h / 50)),
+      ),
+    ),
+  );
 
-footmanSprites.map((footmanSprite) => app.addDrawable(footmanSprite));
+  footmanSprites.forEach(
+    (footmanSprite) => footmanSprite && app.addDrawable(footmanSprite),
+  );
 
-app.run();
+  app.run();
+})();

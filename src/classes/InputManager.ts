@@ -42,7 +42,7 @@ export class InputManager {
   private _isMouseOver: boolean = false;
   private _mouseCoords: Coords = new Coords();
   private _mouseInputMap: ButtonsMap<number> = new ButtonsMap();
-  private _keybordInputMap: ButtonsMap<string> = new ButtonsMap();
+  private _keyboardInputMap: ButtonsMap<string> = new ButtonsMap();
 
   constructor(canvasElem: HTMLCanvasElement) {
     this._canvasElem = canvasElem;
@@ -79,11 +79,11 @@ export class InputManager {
     window.addEventListener("keyup", this.handleKeyUp);
   }
 
-  destory() {
+  destroy() {
     this._canvasElem.removeEventListener("mouseenter", this.handleMouseEnter);
     this._canvasElem.removeEventListener("mouseleave", this.handleMouseLeave);
     this._canvasElem.removeEventListener("mousemove", this.handleMouseMove);
-    this._canvasElem.removeEventListener("mousemove", this.handleMouseDown);
+    this._canvasElem.removeEventListener("mousedown", this.handleMouseDown);
     this._canvasElem.removeEventListener("mouseup", this.handleMouseUp);
     this._canvasElem.removeEventListener("contextmenu", this.handleContextMenu);
 
@@ -94,13 +94,13 @@ export class InputManager {
   processInput() {
     return {
       mouseInputMap: this._mouseInputMap,
-      keyboardInputMap: this._keybordInputMap,
+      keyboardInputMap: this._keyboardInputMap,
     };
   }
 
   clearInput() {
     this._mouseInputMap.clearInput();
-    this._keybordInputMap.clearInput();
+    this._keyboardInputMap.clearInput();
   }
 
   private handleMouseEnter() {
@@ -137,14 +137,14 @@ export class InputManager {
   private handleKeyDown(event: KeyboardEvent) {
     if (event.repeat) return;
 
-    this._keybordInputMap.set(event.code, {
+    this._keyboardInputMap.set(event.code, {
       pressed: true,
       pressedThisFrame: true,
     });
   }
 
   private handleKeyUp(event: KeyboardEvent) {
-    this._keybordInputMap.set(event.code, {
+    this._keyboardInputMap.set(event.code, {
       pressed: false,
       releasedThisFrame: true,
     });

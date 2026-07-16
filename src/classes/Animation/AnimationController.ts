@@ -39,7 +39,7 @@ const IDLE_STATE: IAnimationState = {
 };
 
 const PLAY_STATE: IAnimationState = {
-  type: AnimationStateEnum.PAUSE,
+  type: AnimationStateEnum.PLAY,
 
   play: () => {},
 
@@ -73,7 +73,7 @@ const PLAY_STATE: IAnimationState = {
 };
 
 export const PAUSE_STATE: IAnimationState = {
-  type: AnimationStateEnum.PLAY,
+  type: AnimationStateEnum.PAUSE,
 
   play: (ctx) => {
     ctx.setState(PLAY_STATE);

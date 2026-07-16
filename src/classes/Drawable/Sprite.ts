@@ -74,16 +74,11 @@ export class Sprite implements IDrawable {
     this._size.w = frame.data.w;
     this._size.h = frame.data.h;
 
-    data.context.drawImage(
-      this._animationController.asset?.elem as CanvasImageSource,
-      frame.data.x,
-      frame.data.y,
-      frame.data.w,
-      frame.data.h,
-      this.x - frame.data.w,
-      this.y - frame.data.h,
-      this.w,
-      this.h,
+    data.renderer.drawImage(
+      this._animationController.asset,
+      frame,
+      this._coords,
+      this._size,
     );
   }
 }

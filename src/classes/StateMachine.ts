@@ -2,9 +2,9 @@ export class StateMachine<T extends string> {
   private _state: T;
   private _transitions: Record<T, Record<T, T>>;
 
-  constructor(initialState: T, transiions: Record<T, Record<T, T>>) {
+  constructor(initialState: T, transitions: Record<T, Record<T, T>>) {
     this._state = initialState;
-    this._transitions = transiions;
+    this._transitions = transitions;
   }
 
   dispatch(nextState: string) {
